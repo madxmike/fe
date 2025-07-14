@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/madxmike/fe/list"
@@ -33,7 +34,17 @@ type Service struct {
 func (s *Service) SubscribeToList(ctx context.Context, listId valid.ID, subscriberEmail valid.EmailAddress) error {
 	subscriber, err := s.SubscriberStore.GetSubscriberFromEmailAddress(ctx, subscriberEmail)
 	if err != nil {
-		return fmt.Errorf("could not subscribe to list: %w", err)
+		if !errors.Is(err, ErrorNoSubscriberExistsForEmailAddress) {
+			return fmt.Errorf("could not subscribe to list: %w", err)
+		}
+
+		subscriber = Subscriber{
+			EmailAddress: subscriberEmail,
+		}
+		subscriber, err = s.SubscriberStore.SaveSubscriber(ctx, subscriber)
+		if err != nil {
+			return fmt.Errorf("could not subscribe to list: %w", err)
+		}
 	}
 
 	err = s.ListStore.SaveSubscriberToList(ctx, listId, subscriber)

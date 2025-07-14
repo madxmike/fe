@@ -15,6 +15,7 @@ func main() {
 
 	inmemStorage := inmem.NewStorage()
 	subscriptionService := subscription.Service{
+		ListStore:       &inmemStorage,
 		SubscriberStore: &inmemStorage,
 	}
 

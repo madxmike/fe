@@ -28,14 +28,9 @@ func (s *Storage) SaveSubscriber(ctx context.Context, subscriber subscription.Su
 	return subscriber, nil
 }
 
-func (s *Storage) SaveSubscriberToList(ctx context.Context, listId valid.ID, subscriberEmail valid.EmailAddress) error {
+func (s *Storage) SaveSubscriberToList(ctx context.Context, listId valid.ID, subscriber subscription.Subscriber) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	subscriber, err := s.GetSubscriberFromEmailAddress(context.TODO(), subscriberEmail)
-	if err != nil {
-		return err
-	}
 
 	listSubscribers, ok := s.subscriptions[listId]
 	if !ok {
@@ -50,14 +45,9 @@ func (s *Storage) SaveSubscriberToList(ctx context.Context, listId valid.ID, sub
 	return nil
 }
 
-func (s *Storage) RemoveSubscriberToList(ctx context.Context, listId valid.ID, subscriberEmail valid.EmailAddress) error {
+func (s *Storage) RemoveSubscriberFromList(ctx context.Context, listId valid.ID, subscriber subscription.Subscriber) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	subscriber, err := s.GetSubscriberFromEmailAddress(context.TODO(), subscriberEmail)
-	if err != nil {
-		return err
-	}
 
 	listSubscribers, ok := s.subscriptions[listId]
 	if !ok {
@@ -107,7 +97,7 @@ func (s *Storage) GetSubscriberFromEmailAddress(ctx context.Context, emailAddres
 		}
 	}
 
-	return subscription.Subscriber{}, storage.ErrorNoSubscriberExistsForEmailAddress
+	return subscription.Subscriber{}, subscription.ErrorNoSubscriberExistsForEmailAddress
 }
 
 func (s *Storage) GetSubscriberFromId(ctx context.Context, id valid.ID) (subscription.Subscriber, error) {
@@ -120,5 +110,5 @@ func (s *Storage) GetSubscriberFromId(ctx context.Context, id valid.ID) (subscri
 		}
 	}
 
-	return subscription.Subscriber{}, storage.ErrorNoSubscriberExistsForEmailAddress
+	return subscription.Subscriber{}, subscription.ErrorNoSubscriberExistsForId
 }
