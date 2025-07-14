@@ -18,7 +18,6 @@ func BuildRoutes(routeHandlers RouteHandlers) http.Handler {
 
 	r.Route("/subscriptions", func(r chi.Router) {
 		r.Route("/{listId}", func(r chi.Router) {
-			r.Post("/subscribe", routeHandlers.Subscription.Subscribe)
 			r.Post("/unsubscribe", routeHandlers.Subscription.Unsubscribe)
 		})
 	})
@@ -27,6 +26,7 @@ func BuildRoutes(routeHandlers RouteHandlers) http.Handler {
 		r.Post("/register", routeHandlers.List.Register)
 		r.Route("/{listId}", func(r chi.Router) {
 			r.Get("/info", routeHandlers.List.Info)
+			r.Post("/subscribe", routeHandlers.Subscription.Subscribe)
 		})
 	})
 	return r
