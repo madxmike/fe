@@ -58,7 +58,7 @@ type InfoResponse struct {
 }
 
 func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
-	id, err := IDURLParam(r)
+	id, err := ListIDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return

@@ -22,8 +22,22 @@ func WriteError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func IDURLParam(r *http.Request) (valid.ID, error) {
+func ListIDURLParam(r *http.Request) (valid.ID, error) {
 	raw, err := valid.NewNonEmptyString(chi.URLParam(r, "listId"))
+	if err != nil {
+		return valid.ID{}, err
+	}
+
+	listId, err := valid.NewListId(raw)
+	if err != nil {
+		return valid.ID{}, err
+	}
+
+	return listId, nil
+}
+
+func SubscriberIDURLParam(r *http.Request) (valid.ID, error) {
+	raw, err := valid.NewNonEmptyString(chi.URLParam(r, "subscriberId"))
 	if err != nil {
 		return valid.ID{}, err
 	}

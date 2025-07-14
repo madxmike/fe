@@ -8,6 +8,10 @@ import (
 	"github.com/madxmike/fe/valid"
 )
 
+type SubscribedMailingList struct {
+	ID valid.ID `json:"id"`
+}
+
 type SubscriptionHandler struct {
 	SubscriptionService subscription.Service
 }
@@ -17,7 +21,7 @@ type SubscribeRequest struct {
 }
 
 func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	id, err := IDURLParam(r)
+	id, err := ListIDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -30,7 +34,7 @@ func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = h.SubscriptionService.SubscribeToList(id, request.SubscriberEmail)
+	err = h.SubscriptionService.SubscribeToList(r.Context(), id, request.SubscriberEmail)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -38,7 +42,7 @@ func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *SubscriptionHandler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
-	id, err := IDURLParam(r)
+	id, err := ListIDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -51,7 +55,41 @@ func (h *SubscriptionHandler) Unsubscribe(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = h.SubscriptionService.UnsubscribeFromList(id, request.SubscriberEmail)
+	err = h.SubscriptionService.UnsubscribeFromList(r.Context(), id, request.SubscriberEmail)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+}
+
+type ListResponse struct {
+	Lists []SubscribedMailingList
+}
+
+func (h *SubscriptionHandler) List(w http.ResponseWriter, r *http.Request) {
+	subscriberId, err := SubscriberIDURLParam(r)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+
+	lists, err := h.SubscriptionService.GetSubscribedLists(r.Context(), subscriberId)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+
+	subscribedLists := make([]SubscribedMailingList, 0, len(lists))
+	for _, v := range lists {
+		subscribedLists = append(subscribedLists, SubscribedMailingList{
+			ID: v.ID,
+		})
+	}
+
+	response := ListResponse{
+		Lists: subscribedLists,
+	}
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		WriteError(w, err)
 		return

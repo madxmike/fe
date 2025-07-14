@@ -13,11 +13,9 @@ import (
 func main() {
 	fmt.Println("Hello, World!")
 
-	inmemStorage := inmem.Storage{
-		ListStorage: inmem.NewListStorage(),
-	}
+	inmemStorage := inmem.NewStorage()
 	subscriptionService := subscription.Service{
-		ListStorage: &inmemStorage,
+		SubscriberStore: &inmemStorage,
 	}
 
 	listService := list.Service{

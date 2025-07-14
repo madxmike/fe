@@ -103,3 +103,7 @@ func (id ID) MarshalJSON() ([]byte, error) {
 	// We want clients to have the string representation directly
 	return json.Marshal(uuid.UUID(id))
 }
+
+func (id ID) String() string {
+	return uuid.UUID(id).String()
+}

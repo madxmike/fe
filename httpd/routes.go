@@ -17,6 +17,7 @@ func BuildRoutes(routeHandlers RouteHandlers) http.Handler {
 	r.Use(middleware.Logger)
 
 	r.Route("/subscriptions", func(r chi.Router) {
+		r.Get("/list", routeHandlers.Subscription.List)
 		r.Route("/{listId}", func(r chi.Router) {
 			r.Post("/unsubscribe", routeHandlers.Subscription.Unsubscribe)
 		})
