@@ -2,22 +2,22 @@ package httpd
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/madxmike/fe"
+	"github.com/madxmike/fe/subscription"
+	"github.com/madxmike/fe/valid"
 )
 
 type SubscriptionHandler struct {
+	SubscriptionService subscription.Service
 }
 
 type SubscribeRequest struct {
-	SubscriberEmail fe.EmailAddress `json:"emailAddress"`
+	SubscriberEmail valid.EmailAddress `json:"emailAddress"`
 }
 
 func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	listId, err := fe.NewListId(chi.URLParam(r, "listId"))
+	listId, err := ListIdURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -30,6 +30,30 @@ func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	fmt.Printf("%s", listId)
-	fmt.Printf("%s", request.SubscriberEmail)
+	err = h.SubscriptionService.SubscribeToList(listId, request.SubscriberEmail)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+}
+
+func (h *SubscriptionHandler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
+	listId, err := ListIdURLParam(r)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+
+	var request SubscribeRequest
+	err = json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+
+	err = h.SubscriptionService.UnsubscribeFromList(listId, request.SubscriberEmail)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
 }
