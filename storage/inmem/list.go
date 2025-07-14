@@ -1,12 +1,12 @@
 package inmem
 
 import (
-	"errors"
 	"slices"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/madxmike/fe/list"
+	"github.com/madxmike/fe/storage"
 	"github.com/madxmike/fe/valid"
 )
 
@@ -52,11 +52,11 @@ func (s *ListStorage) SaveSubscriberToList(id valid.ID, subscriberEmail valid.Em
 
 	listSubscribers, ok := s.subscriptions[id]
 	if !ok {
-		return errors.New("list does not exist")
+		return storage.ErrorListDoesNotExist
 	}
 
 	if slices.Contains(listSubscribers, subscriberEmail) {
-		return errors.New("subscriber is already subscribed")
+		return storage.ErrorAlreadySubscribedToList
 	}
 
 	s.subscriptions[id] = append(listSubscribers, subscriberEmail)
@@ -69,7 +69,7 @@ func (s *ListStorage) RemoveSubscriberToList(id valid.ID, subscriberEmail valid.
 
 	listSubscribers, ok := s.subscriptions[id]
 	if !ok {
-		return errors.New("list does not exist")
+		return storage.ErrorListDoesNotExist
 	}
 
 	idx := slices.Index(listSubscribers, subscriberEmail)
@@ -82,5 +82,11 @@ func (s *ListStorage) RemoveSubscriberToList(id valid.ID, subscriberEmail valid.
 }
 
 func (s *ListStorage) ReadList(id valid.ID) (list.MailingList, error) {
-	return list.MailingList{}, nil
+	for _, list := range s.lists {
+		if list.ID == id {
+			return list, nil
+		}
+	}
+
+	return list.MailingList{}, storage.ErrorListDoesNotExist
 }
