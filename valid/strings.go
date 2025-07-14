@@ -97,3 +97,9 @@ func (id *ID) UnmarshalJSON(b []byte) error {
 	*id = listId
 	return nil
 }
+
+func (id ID) MarshalJSON() ([]byte, error) {
+	// We have to do this otherwise this data gets marshalled as a raw byte array
+	// We want clients to have the string representation directly
+	return json.Marshal(uuid.UUID(id))
+}
