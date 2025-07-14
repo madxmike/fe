@@ -71,18 +71,18 @@ func (ea *EmailAddress) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type ListId uuid.UUID
+type ID uuid.UUID
 
-func NewListId(s NonEmptyString) (ListId, error) {
+func NewListId(s NonEmptyString) (ID, error) {
 	uuid, err := uuid.Parse(string(s))
 	if err != nil {
-		return ListId{}, ListIdNotUUID
+		return ID{}, ListIdNotUUID
 	}
 
-	return ListId(uuid), nil
+	return ID(uuid), nil
 }
 
-func (id *ListId) UnmarshalJSON(b []byte) error {
+func (id *ID) UnmarshalJSON(b []byte) error {
 	var raw NonEmptyString
 	err := json.Unmarshal(b, &raw)
 	if err != nil {

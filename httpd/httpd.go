@@ -22,15 +22,15 @@ func WriteError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func ListIdURLParam(r *http.Request) (valid.ListId, error) {
+func IDURLParam(r *http.Request) (valid.ID, error) {
 	raw, err := valid.NewNonEmptyString(chi.URLParam(r, "listId"))
 	if err != nil {
-		return valid.ListId{}, err
+		return valid.ID{}, err
 	}
 
 	listId, err := valid.NewListId(raw)
 	if err != nil {
-		return valid.ListId{}, err
+		return valid.ID{}, err
 	}
 
 	return listId, nil

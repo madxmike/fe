@@ -6,70 +6,81 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/madxmike/fe/list"
 	"github.com/madxmike/fe/valid"
 )
 
 type ListStorage struct {
 	mu *sync.Mutex
 
-	lists map[valid.ListId][]valid.EmailAddress
+	lists         []list.MailingList
+	subscriptions map[valid.ID][]valid.EmailAddress
 }
 
 func NewListStorage() ListStorage {
 	return ListStorage{
-		mu:    &sync.Mutex{},
-		lists: make(map[valid.ListId][]valid.EmailAddress),
+		mu:            &sync.Mutex{},
+		lists:         make([]list.MailingList, 0),
+		subscriptions: make(map[valid.ID][]valid.EmailAddress),
 	}
 }
 
-func (s *ListStorage) CreateList(emailAddress valid.EmailAddress) (valid.ListId, error) {
+func (s *ListStorage) CreateList(emailAddress valid.EmailAddress) (valid.ID, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	uuid, err := uuid.NewV7()
 	if err != nil {
-		return valid.ListId{}, err
+		return valid.ID{}, err
 	}
 
-	listID := valid.ListId(uuid)
+	listID := valid.ID(uuid)
 
-	// TODO (Michael): Duplication error
-	s.lists[listID] = make([]valid.EmailAddress, 0)
+	s.lists = append(s.lists, list.MailingList{
+		ID:           listID,
+		EmailAddress: emailAddress,
+	})
+
+	s.subscriptions[listID] = make([]valid.EmailAddress, 0)
 
 	return listID, nil
 }
 
-func (s *ListStorage) SaveSubscriberToList(listId valid.ListId, subscriberEmail valid.EmailAddress) error {
+func (s *ListStorage) SaveSubscriberToList(id valid.ID, subscriberEmail valid.EmailAddress) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	list := s.lists[listId]
-	if list == nil {
+	listSubscribers, ok := s.subscriptions[id]
+	if !ok {
 		return errors.New("list does not exist")
 	}
 
-	if slices.Contains(list, subscriberEmail) {
+	if slices.Contains(listSubscribers, subscriberEmail) {
 		return errors.New("subscriber is already subscribed")
 	}
 
-	s.lists[listId] = append(s.lists[listId], subscriberEmail)
+	s.subscriptions[id] = append(listSubscribers, subscriberEmail)
 	return nil
 }
 
-func (s *ListStorage) RemoveSubscriberToList(listId valid.ListId, subscriberEmail valid.EmailAddress) error {
+func (s *ListStorage) RemoveSubscriberToList(id valid.ID, subscriberEmail valid.EmailAddress) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	list := s.lists[listId]
-	if list == nil {
+	listSubscribers, ok := s.subscriptions[id]
+	if !ok {
 		return errors.New("list does not exist")
 	}
 
-	idx := slices.Index(list, subscriberEmail)
+	idx := slices.Index(listSubscribers, subscriberEmail)
 	if idx == -1 {
 		return nil
 	}
 
-	s.lists[listId] = append(list[:idx], list[idx+1:]...)
+	s.subscriptions[id] = append(listSubscribers[:idx], listSubscribers[idx+1:]...)
 	return nil
+}
+
+func (s *ListStorage) ReadList(id valid.ID) (list.MailingList, error) {
+	return list.MailingList{}, nil
 }

@@ -17,7 +17,7 @@ type SubscribeRequest struct {
 }
 
 func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	listId, err := ListIdURLParam(r)
+	id, err := IDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -30,7 +30,7 @@ func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = h.SubscriptionService.SubscribeToList(listId, request.SubscriberEmail)
+	err = h.SubscriptionService.SubscribeToList(id, request.SubscriberEmail)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -38,7 +38,7 @@ func (h *SubscriptionHandler) Subscribe(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *SubscriptionHandler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
-	listId, err := ListIdURLParam(r)
+	id, err := IDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -51,7 +51,7 @@ func (h *SubscriptionHandler) Unsubscribe(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = h.SubscriptionService.UnsubscribeFromList(listId, request.SubscriberEmail)
+	err = h.SubscriptionService.UnsubscribeFromList(id, request.SubscriberEmail)
 	if err != nil {
 		WriteError(w, err)
 		return

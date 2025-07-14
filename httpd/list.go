@@ -18,7 +18,7 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	ListId valid.ListId `json:"listId"`
+	ListId valid.ID `json:"listId"`
 }
 
 func (h *ListHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -50,4 +50,20 @@ func (h *ListHandler) Register(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, err)
 		return
 	}
+}
+
+type InfoResponse struct {
+	ID           valid.ID           `json:"id"`
+	EmailAddress valid.EmailAddress `json:"emailAddress"`
+}
+
+func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
+	_, err := IDURLParam(r)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+
+	// todo impl
+
 }
