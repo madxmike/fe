@@ -25,11 +25,12 @@ func WriteError(w http.ResponseWriter, err error) {
 func ListIdURLParam(r *http.Request) (valid.ListId, error) {
 	raw, err := valid.NewNonEmptyString(chi.URLParam(r, "listId"))
 	if err != nil {
-		return "", err
+		return valid.ListId{}, err
 	}
+
 	listId, err := valid.NewListId(raw)
 	if err != nil {
-		return "", err
+		return valid.ListId{}, err
 	}
 
 	return listId, nil

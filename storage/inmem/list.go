@@ -1,12 +1,11 @@
 package inmem
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"slices"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/madxmike/fe/valid"
 )
 
@@ -27,16 +26,17 @@ func (s *ListStorage) CreateList(emailAddress valid.EmailAddress) (valid.ListId,
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// TODO (Michael): Create more elaborate listid system than just hash , probably uuidv7 or something
-	hash := md5.Sum([]byte(emailAddress))
-	listId, err := valid.NewListId(valid.NonEmptyString(string(hex.EncodeToString(hash[:]))))
+	uuid, err := uuid.NewV7()
 	if err != nil {
-		return "", err
+		return valid.ListId{}, err
 	}
 
-	s.lists[listId] = make([]valid.EmailAddress, 0)
+	listID := valid.ListId(uuid)
 
-	return listId, nil
+	// TODO (Michael): Duplication error
+	s.lists[listID] = make([]valid.EmailAddress, 0)
+
+	return listID, nil
 }
 
 func (s *ListStorage) SaveSubscriberToList(listId valid.ListId, subscriberEmail valid.EmailAddress) error {

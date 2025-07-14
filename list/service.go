@@ -17,7 +17,7 @@ type Service struct {
 func (s *Service) CreateList(emailAddress valid.EmailAddress) (valid.ListId, error) {
 	listId, err := s.ListStorage.CreateList(emailAddress)
 	if err != nil {
-		return "", fmt.Errorf("failed to create list: %w", err)
+		return valid.ListId{}, fmt.Errorf("failed to create list: %w", err)
 	}
 
 	return listId, nil

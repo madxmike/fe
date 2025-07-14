@@ -3,10 +3,13 @@ package valid
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 var (
 	StringIsNullOrEmpty         = ValidationError("value is null or empty")
+	ListIdNotUUID               = ValidationError("list id is not a valid uuid value")
 	EmailAddressMalformed       = ValidationError("email address is malformed")
 	EmailAddressPrefixMalformed = ValidationError("email address prefix is malformed")
 	EmailAddressDomainMalformed = ValidationError("email address domain is malformed")
@@ -68,10 +71,15 @@ func (ea *EmailAddress) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type ListId NonEmptyString
+type ListId uuid.UUID
 
 func NewListId(s NonEmptyString) (ListId, error) {
-	return ListId(s), nil
+	uuid, err := uuid.Parse(string(s))
+	if err != nil {
+		return ListId{}, ListIdNotUUID
+	}
+
+	return ListId(uuid), nil
 }
 
 func (id *ListId) UnmarshalJSON(b []byte) error {
@@ -81,11 +89,11 @@ func (id *ListId) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	v, err := NewListId(raw)
+	listId, err := NewListId(raw)
 	if err != nil {
 		return err
 	}
 
-	*id = v
+	*id = listId
 	return nil
 }
