@@ -25,6 +25,9 @@ func BuildRoutes(routeHandlers RouteHandlers) http.Handler {
 
 	r.Route("/lists", func(r chi.Router) {
 		r.Post("/register", routeHandlers.List.Register)
+		r.Route("/{listId}", func(r chi.Router) {
+			r.Get("/info", routeHandlers.List.Info)
+		})
 	})
 	return r
 }

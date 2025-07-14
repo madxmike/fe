@@ -58,12 +58,26 @@ type InfoResponse struct {
 }
 
 func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
-	_, err := IDURLParam(r)
+	id, err := IDURLParam(r)
 	if err != nil {
 		WriteError(w, err)
 		return
 	}
 
-	// todo impl
+	list, err := h.ListService.Info(id)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
 
+	response := InfoResponse{
+		ID:           list.ID,
+		EmailAddress: list.EmailAddress,
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
 }
