@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/madxmike/fe/list"
 	"github.com/madxmike/fe/valid"
 )
@@ -35,14 +36,22 @@ func (h *ListHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	listId, err := h.ListService.CreateList(emailAddress)
+	// TODO (Michael): We want this to be given from the request. Maybe we need to look this up in the service level instead?
+	adminUUID, err := uuid.NewV7()
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+	adminId := valid.ID(adminUUID)
+
+	list, err := h.ListService.CreateList(r.Context(), adminId, emailAddress)
 	if err != nil {
 		WriteError(w, err)
 		return
 	}
 
 	response := RegisterResponse{
-		ListId: listId,
+		ListId: list.ID,
 	}
 
 	err = json.NewEncoder(w).Encode(response)
@@ -64,7 +73,7 @@ func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := h.ListService.Info(id)
+	list, err := h.ListService.Info(r.Context(), id)
 	if err != nil {
 		WriteError(w, err)
 		return

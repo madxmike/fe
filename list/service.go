@@ -1,6 +1,7 @@
 package list
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/madxmike/fe/valid"
@@ -8,29 +9,34 @@ import (
 
 type MailingList struct {
 	ID           valid.ID
+	Admin        valid.ID
 	EmailAddress valid.EmailAddress
 }
 
-type ListStorage interface {
-	CreateList(emailAddress valid.EmailAddress) (valid.ID, error)
-	ReadList(id valid.ID) (MailingList, error)
+type ListStore interface {
+	SaveList(ctx context.Context, list MailingList) (MailingList, error)
+	ReadList(ctx context.Context, listId valid.ID) (MailingList, error)
 }
 
 type Service struct {
-	ListStorage ListStorage
+	ListStore ListStore
 }
 
-func (s *Service) CreateList(emailAddress valid.EmailAddress) (valid.ID, error) {
-	listId, err := s.ListStorage.CreateList(emailAddress)
+func (s *Service) CreateList(ctx context.Context, adminID valid.ID, emailAddress valid.EmailAddress) (MailingList, error) {
+	list := MailingList{
+		Admin:        adminID,
+		EmailAddress: emailAddress,
+	}
+	list, err := s.ListStore.SaveList(ctx, list)
 	if err != nil {
-		return valid.ID{}, fmt.Errorf("failed to create list: %w", err)
+		return MailingList{}, fmt.Errorf("failed to create list: %w", err)
 	}
 
-	return listId, nil
+	return list, nil
 }
 
-func (s *Service) Info(id valid.ID) (MailingList, error) {
-	list, err := s.ListStorage.ReadList(id)
+func (s *Service) Info(ctx context.Context, listId valid.ID) (MailingList, error) {
+	list, err := s.ListStore.ReadList(ctx, listId)
 	if err != nil {
 		return MailingList{}, fmt.Errorf("failed to get list info: %w", err)
 	}

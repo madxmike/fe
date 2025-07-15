@@ -20,7 +20,7 @@ func main() {
 	}
 
 	listService := list.Service{
-		ListStorage: &inmemStorage,
+		ListStore: &inmemStorage,
 	}
 
 	mux := httpd.BuildRoutes(httpd.RouteHandlers{

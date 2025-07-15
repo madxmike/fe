@@ -1,37 +1,35 @@
 package inmem
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/madxmike/fe/list"
 	"github.com/madxmike/fe/storage"
 	"github.com/madxmike/fe/valid"
 )
 
-func (s *Storage) CreateList(emailAddress valid.EmailAddress) (valid.ID, error) {
+func (s *Storage) SaveList(ctx context.Context, mailingList list.MailingList) (list.MailingList, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	uuid, err := uuid.NewV7()
 	if err != nil {
-		return valid.ID{}, err
+		return list.MailingList{}, err
 	}
 
-	listID := valid.ID(uuid)
+	mailingList.ID = valid.ID(uuid)
+	s.lists = append(s.lists, mailingList)
 
-	s.lists = append(s.lists, list.MailingList{
-		ID:           listID,
-		EmailAddress: emailAddress,
-	})
+	s.subscriptions[mailingList.ID] = make([]valid.ID, 0)
 
-	s.subscriptions[listID] = make([]valid.ID, 0)
-
-	return listID, nil
+	return mailingList, nil
 }
 
-func (s *Storage) ReadList(id valid.ID) (list.MailingList, error) {
-	for _, list := range s.lists {
-		if list.ID == id {
-			return list, nil
+func (s *Storage) ReadList(ctx context.Context, id valid.ID) (list.MailingList, error) {
+	for _, mailingList := range s.lists {
+		if mailingList.ID == id {
+			return mailingList, nil
 		}
 	}
 
