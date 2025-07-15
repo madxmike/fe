@@ -7,10 +7,19 @@ import (
 	"github.com/madxmike/fe/valid"
 )
 
+const (
+	PublicationDefaultName = "New Publication"
+)
+
 type MailingList struct {
 	ID           valid.ID
 	Admin        valid.ID
 	EmailAddress valid.EmailAddress
+	Publication  Publication
+}
+
+type Publication struct {
+	Name valid.NonEmptyString
 }
 
 type ListStore interface {
@@ -26,6 +35,9 @@ func (s *Service) CreateList(ctx context.Context, adminID valid.ID, emailAddress
 	list := MailingList{
 		Admin:        adminID,
 		EmailAddress: emailAddress,
+		Publication: Publication{
+			Name: PublicationDefaultName,
+		},
 	}
 	list, err := s.ListStore.SaveList(ctx, list)
 	if err != nil {

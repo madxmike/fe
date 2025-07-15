@@ -9,7 +9,8 @@ import (
 )
 
 type SubscribedMailingList struct {
-	ID valid.ID `json:"id"`
+	ID              valid.ID             `json:"id"`
+	PublicationName valid.NonEmptyString `json:"publicationName"`
 }
 
 type SubscriptionHandler struct {
@@ -82,7 +83,8 @@ func (h *SubscriptionHandler) List(w http.ResponseWriter, r *http.Request) {
 	subscribedLists := make([]SubscribedMailingList, 0, len(lists))
 	for _, v := range lists {
 		subscribedLists = append(subscribedLists, SubscribedMailingList{
-			ID: v.ID,
+			ID:              v.ID,
+			PublicationName: v.Publication.Name,
 		})
 	}
 

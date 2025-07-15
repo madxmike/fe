@@ -64,6 +64,11 @@ func (h *ListHandler) Register(w http.ResponseWriter, r *http.Request) {
 type InfoResponse struct {
 	ID           valid.ID           `json:"id"`
 	EmailAddress valid.EmailAddress `json:"emailAddress"`
+	Publication  PublicationInfo    `json:"publication"`
+}
+
+type PublicationInfo struct {
+	Name valid.NonEmptyString `json:"name"`
 }
 
 func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +87,9 @@ func (h *ListHandler) Info(w http.ResponseWriter, r *http.Request) {
 	response := InfoResponse{
 		ID:           list.ID,
 		EmailAddress: list.EmailAddress,
+		Publication: PublicationInfo{
+			Name: list.Publication.Name,
+		},
 	}
 
 	err = json.NewEncoder(w).Encode(response)
